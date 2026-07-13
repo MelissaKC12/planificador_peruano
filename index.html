@@ -919,10 +919,66 @@ function renderPantryList(){
   const lc={refrigerador:'loc-ref',despensa:'loc-des',congelador:'loc-con'};
   items.forEach(item=>{el.innerHTML+=`<div class="pantry-item"><span class="pantry-loc ${lc[item.ubicacion]||'loc-des'}">${item.ubicacion}</span><span class="pantry-name">${item.nombre}</span><span class="pantry-qty">${item.cantidad_aprox||''}</span><button class="pantry-del" onclick="deletePantryItem(${item.id})">✕</button></div>`;});
 }
+// ... (asegúrate de que empiece desde sugerirConAlacena)
 async function sugerirConAlacena() {
   if(!S.pantry.length){toast('Agrega ingredientes primero');return;}
   if(!GEMINI_KEY){toast('Configura tu API Key primero');return;}
   const lista=S.pantry.map(p=>`${p.nombre}${p.cantidad_aprox?' ('+p.cantidad_aprox+')':''}`).join(', ');
   showLoading('Buscando ideas con tu alacena...');
   try {
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:`Tengo estos ingredientes en mi alacena peruana: ${lista}. Sugiéreme 3 platos peruanos o ideas de comidas que pueda preparar con ellos. Devuelve una respuesta corta estructurada con HTML.`}]}]})
+    });
+    const d=await r.json(); hideLoading();
+    const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||'No se encontraron sugerencias.';
+    document.getElementById('pantry-sug').style.display='block';
+    document.getElementById('pantry-sug-out').innerHTML=txt;
+  } catch(e) { hideLoading(); toast('✕ Error al obtener sugerencias'); }
+}
+
+// ══════════════════════════════════════════════════
+// NAVEGACIÓN Y UTILERÍA DE VENTANAS (AQUÍ DEBES ASEGURARTE QUE ESTÉ DEFINIDA LA FUNCIÓN NAV)
+// ══════════════════════════════════════════════════
+function nav(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+  
+  const targetPage = document.getElementById(`page-${pageId}`);
+  if (targetPage) targetPage.classList.add('on');
+  
+  // Buscar el botón correspondiente para activarlo visualmente
+  const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(pageId));
+  if (btn) btn.classList.add('on');
+  
+  if (pageId === 'alacena') nav_alacena();
+  if (pageId === 'adherencia') renderAdherencia();
+  if (pageId === 'medidas') renderMedidas();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+function showLoading(msg) { document.getElementById('loading-msg').textContent=msg; document.getElementById('loading').classList.add('on'); }
+function hideLoading() { document.getElementById('loading').classList.remove('on'); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Inicializar la aplicación al cargar la página
+window.onload = function() {
+  loadState();
+  if (GEMINI_KEY && APPS_SCRIPT_URL) {
+    testConexion();
+  } else {
+    setSyncErr();
+  }
+  renderPlan();
+  renderRutina();
+  renderMedidas();
+  renderPantry();
+};
+</script>
+</body>
+</html>
