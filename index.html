@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Planificador Peruano Pro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700;800&display=swap');
+:root{--bg:#0d0f14;--s1:#13161e;--s2:#1a1e2a;--s3:#212636;--border:#252b3b;--border2:#2e3548;--accent:#e8b44b;--a2:#4ecb8d;--a3:#6c8ef5;--a4:#e86b4b;--text:#e8eaf2;--muted:#6b7494;--muted2:#8b95b4;--font-d:'Sora',sans-serif;--font-b:'Inter',sans-serif;--r:10px;--r2:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.shell{display:flex;flex-direction:column;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#c47a1a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+header h1{font-family:var(--font-d);font-size:16px;color:var(--accent);letter-spacing:-.3px}
+header p{font-size:11px;color:var(--muted)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);margin-left:auto;flex-shrink:0;transition:.3s}
+.sync-dot.ok{background:var(--a2)}.sync-dot.err{background:var(--a4)}.sync-dot.loading{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nav{display:flex;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;padding:0 8px}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:11px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:5px}
+.nav-btn.on{color:var(--accent);border-bottom-color:var(--accent)}.nav-btn:hover:not(.on){color:var(--text)}
+.page{display:none;padding:18px 18px 90px;max-width:900px;margin:0 auto}.page.on{display:block}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:14px}
+.card-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;display:block;flex-shrink:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-b);font-size:13px;padding:9px 11px;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}select option{background:var(--s2)}textarea{resize:vertical;min-height:60px}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;border:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--accent);color:#1a0f00}.btn-s{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.btn-g{background:rgba(78,203,141,.15);color:var(--a2);border:1px solid rgba(78,203,141,.25)}
+.btn-r{background:rgba(232,107,75,.12);color:var(--a4);border:1px solid rgba(232,107,75,.2)}
+.btn-sm{padding:6px 12px;font-size:11px}.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.muscle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mbtn{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:10px 6px;cursor:pointer;text-align:center;transition:.2s;color:var(--muted);font-size:11px;font-weight:600}
+.mbtn .mi{font-size:20px;margin-bottom:3px;display:block}
+.mbtn.low{color:var(--muted);border-color:var(--border)}.mbtn.med{color:var(--a3);border-color:var(--a3);background:rgba(108,142,245,.08)}.mbtn.high{color:var(--accent);border-color:var(--accent);background:rgba(232,180,75,.1)}
+.pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.p-cal{background:rgba(232,180,75,.12);color:var(--accent)}.p-pro{background:rgba(78,203,141,.12);color:var(--a2)}.p-car{background:rgba(108,142,245,.12);color:var(--a3)}.p-fat{background:rgba(232,107,75,.12);color:var(--a4)}.p-ok{background:rgba(78,203,141,.12);color:var(--a2)}.p-warn{background:rgba(232,180,75,.12);color:var(--accent)}.p-err{background:rgba(232,107,75,.12);color:var(--a4)}
+.pills-row{display:flex;gap:6px;flex-wrap:wrap}
+.dtabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.dtabs::-webkit-scrollbar{display:none}
+.dtab{padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--muted);transition:.2s;white-space:nowrap;flex-shrink:0}
+.dtab.on{background:var(--accent);color:#1a0f00;border-color:var(--accent)}.dtab.train{border-color:rgba(78,203,141,.4);color:var(--a2)}
+.meal{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:9px}
+.meal-head{display:flex;align-items:flex-start;gap:12px}
+.meal-time{min-width:60px;text-align:center}.meal-time .t{font-size:13px;font-weight:700;color:var(--accent);display:block}.meal-time .l{font-size:10px;color:var(--muted);text-transform:uppercase}
+.meal-body{flex:1}.meal-name{font-weight:600;font-size:14px;color:var(--text);margin-bottom:3px}.meal-ing{font-size:12px;color:var(--muted2);line-height:1.7}
+.meal-macros{text-align:right;flex-shrink:0}.meal-kcal{font-size:15px;font-weight:800;color:var(--accent)}.meal-md{font-size:11px;color:var(--muted);line-height:1.6}
+.meal-check{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check-btn{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--s1);color:var(--muted);transition:.2s}
+.check-btn.ok{background:rgba(78,203,141,.12);color:var(--a2);border-color:rgba(78,203,141,.3)}.check-btn.rep{background:rgba(108,142,245,.12);color:var(--a3);border-color:rgba(108,142,245,.3)}.check-btn.skip{background:rgba(232,107,75,.1);color:var(--a4);border-color:rgba(232,107,75,.2)}
+.ex-day{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:10px}
+.ex-day-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:var(--s2);border-bottom:1px solid var(--border)}
+.ex-day-title{font-weight:700;font-size:13px}.ex-day-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700}
+.b-legs{background:rgba(232,180,75,.12);color:var(--accent)}.b-push{background:rgba(108,142,245,.12);color:var(--a3)}.b-pull{background:rgba(78,203,141,.12);color:var(--a2)}.b-rest{background:rgba(107,116,148,.1);color:var(--muted)}.b-full{background:rgba(232,107,75,.1);color:var(--a4)}
+.ex-list{padding:12px 15px;display:flex;flex-direction:column;gap:7px}
+.ex-row{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--s2);border-radius:8px;border:1px solid var(--border);flex-wrap:wrap}
+.ex-num{width:22px;height:22px;border-radius:50%;background:var(--s1);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0}
+.ex-name{font-weight:500;font-size:13px;flex:1}.ex-muscle{font-size:11px;color:var(--muted)}.ex-sets{font-size:12px;font-weight:700;color:var(--a3)}.ex-weight{font-size:11px;color:var(--accent)}
+.measure-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.measure-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+.measure-val{font-size:20px;font-weight:800;font-family:var(--font-d);color:var(--accent)}.measure-unit{font-size:10px;color:var(--muted)}.measure-lbl{font-size:11px;color:var(--muted2);margin-top:2px}.measure-delta{font-size:11px;font-weight:600;margin-top:2px}
+.delta-pos{color:var(--a4)}.delta-neg{color:var(--a2)}
+.chart-bar-wrap{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.chart-row{display:flex;align-items:center;gap:8px}.chart-lbl{font-size:11px;color:var(--muted);width:32px;text-align:right;flex-shrink:0}
+.chart-bar-bg{flex:1;height:8px;background:var(--s3);border-radius:4px;overflow:hidden}.chart-bar-fill{height:100%;border-radius:4px;transition:width .5s}.chart-val{font-size:11px;color:var(--muted2);width:44px;text-align:right;flex-shrink:0}
+.pantry-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px}
+.pantry-loc{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.loc-ref{background:rgba(108,142,245,.12);color:var(--a3)}.loc-des{background:rgba(232,180,75,.1);color:var(--accent)}.loc-con{background:rgba(78,203,141,.1);color:var(--a2)}
+.pantry-name{flex:1;font-size:13px;font-weight:500}.pantry-qty{font-size:12px;color:var(--muted)}.pantry-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;transition:.2s}.pantry-del:hover{color:var(--a4)}
+.scan-zone{border:2px dashed var(--border2);border-radius:var(--r2);padding:28px;text-align:center;cursor:pointer;transition:.2s;background:var(--s2)}.scan-zone:hover{border-color:var(--accent)}
+.scan-icon{font-size:32px;margin-bottom:8px}.scan-result{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:12px}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.week-day{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:8px 5px;text-align:center}
+.week-day-name{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+.week-dot{width:8px;height:8px;border-radius:50%;margin:0 auto 2px;background:var(--border)}.week-dot.ok{background:var(--a2)}.week-dot.part{background:var(--accent)}.week-dot.miss{background:var(--a4)}
+.hist-entry{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.hist-date{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.hist-meals{display:flex;flex-wrap:wrap;gap:5px}.hist-meal-tag{font-size:11px;padding:3px 9px;background:var(--s1);border:1px solid var(--border);border-radius:20px;color:var(--muted2)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(13,15,20,.88);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-bg.on{display:flex}.modal{background:var(--s1);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
+.modal h3{font-family:var(--font-d);font-size:15px;margin-bottom:16px;color:var(--text)}.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;margin-left:8px}
+.loading{display:none;position:fixed;inset:0;background:rgba(13,15,20,.9);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.loading.on{display:flex}.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}.loading-msg{font-size:13px;color:var(--muted);text-align:center;max-width:200px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:13px;color:var(--text);z-index:400;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}.empty-icon{font-size:38px;margin-bottom:10px}.empty h3{font-size:15px;color:var(--text);margin-bottom:6px}
+.stat{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}.stat-val{font-family:var(--font-d);font-size:22px;font-weight:800;color:var(--accent)}.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+/* CONFIG BANNER */
+.config-banner{background:rgba(232,107,75,.08);border:1px solid rgba(232,107,75,.25);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:12px;color:var(--a4);display:none}
+.config-banner.show{display:block}
+@media(max-width:580px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}.measure-grid{grid-template-columns:repeat(2,1fr)}.meal-head{flex-wrap:wrap}.meal-macros{margin-left:72px}}
+@media(max-width:380px){.g2,.g3,.g4{grid-template-columns:1fr}.measure-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="logo">🇵🇪</div>
+  <div><h1>Planificador Peruano Pro</h1><p id="sync-status">Conectando con Sheets...</p></div>
+  <div class="sync-dot loading" id="sync-dot" title="Estado de conexión con Google Sheets"></div>
+</header>
+<div class="nav">
+  <button class="nav-btn on" onclick="nav('config')">⚙️ Config</button>
+  <button class="nav-btn" onclick="nav('perfil')">👤 Perfil</button>
+  <button class="nav-btn" onclick="nav('plan')">📅 Plan</button>
+  <button class="nav-btn" onclick="nav('adherencia')">✅ Adherencia</button>
+  <button class="nav-btn" onclick="nav('rutina')">🏋️ Rutina</button>
+  <button class="nav-btn" onclick="nav('medidas')">📏 Medidas</button>
+  <button class="nav-btn" onclick="nav('alacena')">🧺 Alacena</button>
+  <button class="nav-btn" onclick="nav('historial')">📋 Historial</button>
+</div>
+<div class="pages">
+
+<!-- ══ CONFIGURACIÓN ══ -->
+<div id="page-config" class="page on">
+  <div class="card">
+    <div class="card-title">🔑 Configuración de conexiones</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ingresa tus claves una sola vez. Se guardan en este dispositivo de forma local.</p>
+    <div style="margin-bottom:14px">
+      <label>API Key de Gemini (Google AI Studio)</label>
+      <input type="text" id="cfg-gemini" placeholder="AIzaSy...tu_key_aqui..." autocomplete="off">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Obtén tu key gratuita en: <span style="color:var(--a3)">aistudio.google.com → Get API Key</span></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label>URL del Apps Script (Google Sheets)</label>
+      <input type="text" id="cfg-script" placeholder="https://script.google.com/macros/s/.../exec">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">La URL /exec que obtuviste al publicar tu Apps Script</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="guardarConfig()">💾 Guardar configuración</button>
+      <button class="btn btn-s" onclick="testConexion()">🔍 Probar conexión</button>
+    </div>
+    <div id="test-result" style="display:none;margin-top:14px;padding:12px;border-radius:8px;font-size:12px;background:var(--s2);border:1px solid var(--border)"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Estado de tus hojas</div>
+    <div id="sheets-status">
+      <div style="font-size:12px;color:var(--muted)">Guarda tu configuración y prueba la conexión para ver el estado de tus hojas.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">ℹ️ Guía rápida</div>
+    <div style="font-size:12px;color:var(--muted2);line-height:1.9">
+      <div>1. Pega tu API Key de Gemini y la URL de tu Apps Script arriba</div>
+      <div>2. Toca "Guardar configuración" → "Probar conexión"</div>
+      <div>3. Si la conexión es exitosa, ve a <strong style="color:var(--text)">Perfil</strong> y llena tus datos</div>
+      <div>4. Toca <strong style="color:var(--text)">"Generar plan"</strong> — Gemini usará tus recetas reales de Sheets</div>
+      <div>5. Registra tus comidas diarias en <strong style="color:var(--text)">Adherencia</strong></div>
+      <div>6. Pesa tus medidas cada lunes en <strong style="color:var(--text)">Medidas</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PERFIL ══ -->
+<div id="page-perfil" class="page">
+  <div id="cfg-banner" class="config-banner">⚠️ Configura tu API Key y URL de Sheets en la pestaña Config antes de continuar.</div>
+  <div class="card">
+    <div class="card-title">Datos personales</div>
+    <div class="g3">
+      <div><label>Peso (kg)</label><input type="number" id="p-peso" value="78"></div>
+      <div><label>Talla (cm)</label><input type="number" id="p-talla" value="172"></div>
+      <div><label>Edad</label><input type="number" id="p-edad" value="26"></div>
+    </div>
+    <div class="g2" style="margin-top:12px">
+      <div><label>Sexo</label><select id="p-sexo"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+      <div><label>Nivel de actividad</label>
+        <select id="p-act">
+          <option value="1.2">Sedentario</option>
+          <option value="1.375">Ligero (1–2 días)</option>
+          <option value="1.55" selected>Moderado (3–4 días)</option>
+          <option value="1.725">Activo (5 días)</option>
+          <option value="1.9">Muy activo (6–7 días)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Meta y entrenamiento</div>
+    <div class="g2">
+      <div><label>Objetivo</label>
+        <select id="p-meta">
+          <option value="recomp">Recomposición corporal</option>
+          <option value="deficit">Déficit (bajar grasa)</option>
+          <option value="superavit">Superávit (ganar masa)</option>
+          <option value="mant">Mantenimiento</option>
+        </select>
+      </div>
+      <div><label>Lugar de entrenamiento</label>
+        <select id="p-lugar"><option value="gym">Gimnasio</option><option value="casa">Casa</option><option value="mixto">Mixto</option></select>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <label>Días disponibles: <span id="dias-val" style="color:var(--accent);font-weight:700">5</span></label>
+      <input type="range" id="p-dias" min="2" max="6" value="5" oninput="document.getElementById('dias-val').textContent=this.value">
+    </div>
+    <div class="g2" style="margin-top:12px">
+      <div><label>Restricciones</label><input type="text" id="p-rest" placeholder="vísceras, mariscos..."></div>
+      <div><label>Alergias</label><input type="text" id="p-aler" placeholder="lactosa, gluten..."></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Prioridad muscular</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px">Toca para cambiar: <span style="color:var(--muted)">baja</span> → <span style="color:var(--a3)">media</span> → <span style="color:var(--accent)">alta</span></p>
+    <div class="muscle-grid" id="muscle-grid">
+      <div class="mbtn high" data-m="Piernas" data-l="high" onclick="cycleM(this)"><span class="mi">🦵</span>Piernas</div>
+      <div class="mbtn high" data-m="Glúteos" data-l="high" onclick="cycleM(this)"><span class="mi">🍑</span>Glúteos</div>
+      <div class="mbtn low" data-m="Espalda" data-l="low" onclick="cycleM(this)"><span class="mi">🔙</span>Espalda</div>
+      <div class="mbtn low" data-m="Pecho" data-l="low" onclick="cycleM(this)"><span class="mi">💪</span>Pecho</div>
+      <div class="mbtn low" data-m="Hombros" data-l="low" onclick="cycleM(this)"><span class="mi">🏋️</span>Hombros</div>
+      <div class="mbtn low" data-m="Brazos" data-l="low" onclick="cycleM(this)"><span class="mi">💪</span>Brazos</div>
+    </div>
+  </div>
+  <div id="macro-preview" style="display:none" class="card">
+    <div class="card-title">Tus macros calculados</div>
+    <div class="g4" id="macro-grid"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-p" onclick="generarPlan()">✦ Generar plan semanal</button>
+    <button class="btn btn-s" onclick="guardarPerfil()">💾 Guardar perfil</button>
+    <button class="btn btn-s btn-sm" onclick="verMacros()">👁 Ver macros</button>
+  </div>
+</div>
+
+<!-- ══ PLAN ══ -->
+<div id="page-plan" class="page">
+  <div id="plan-empty" class="empty"><div class="empty-icon">🥘</div><h3>Sin plan activo</h3><p style="margin-bottom:16px">Ve a Perfil y genera tu primer plan</p><button class="btn btn-p" onclick="nav('perfil')">Ir a Perfil</button></div>
+  <div id="plan-content" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div><div style="font-family:var(--font-d);font-size:18px;font-weight:700">Plan semanal</div><div class="pills-row" style="margin-top:6px" id="plan-pills"></div></div>
+      <div class="btn-row" style="margin-top:0"><button class="btn btn-s btn-sm" onclick="generarPlan()">🔄 Regenerar</button><button class="btn btn-s btn-sm" onclick="generarDiaAislado()">+ Día extra</button></div>
+    </div>
+    <div class="dtabs" id="day-tabs"></div>
+    <div id="meals-out"></div>
+  </div>
+</div>
+
+<!-- ══ ADHERENCIA ══ -->
+<div id="page-adherencia" class="page">
+  <div id="adh-empty" class="empty"><div class="empty-icon">✅</div><h3>Sin plan activo</h3><p style="margin-bottom:16px">Genera tu plan primero</p><button class="btn btn-p" onclick="nav('perfil')">Generar plan</button></div>
+  <div id="adh-content" style="display:none">
+    <div style="font-family:var(--font-d);font-size:18px;font-weight:700;margin-bottom:12px">Seguimiento semanal</div>
+    <div class="week-grid" id="adh-week"></div>
+    <div class="g4" style="margin:14px 0" id="adh-stats"></div>
+    <div class="dtabs" id="adh-tabs"></div>
+    <div id="adh-meals"></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">📷 Escanear etiqueta nutricional</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Fotografía la tabla nutricional de cualquier empaque para registrar sus macros automáticamente</p>
+      <div class="scan-zone" onclick="document.getElementById('scan-input').click()">
+        <div class="scan-icon">📸</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Toca para fotografiar</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">o selecciona imagen de tu galería</div>
+      </div>
+      <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none" onchange="scanLabel(this)">
+      <div id="scan-result" style="display:none" class="scan-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RUTINA ══ -->
+<div id="page-rutina" class="page">
+  <div id="rut-empty" class="empty"><div class="empty-icon">🏋️</div><h3>Sin rutina</h3><p style="margin-bottom:16px">Genera tu plan para ver la rutina</p><button class="btn btn-p" onclick="nav('perfil')">Ir a Perfil</button></div>
+  <div id="rut-content" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:var(--font-d);font-size:18px;font-weight:700">Mi rutina</div>
+      <span id="rut-lugar" class="badge b-push"></span>
+    </div>
+    <div id="rut-out"></div>
+  </div>
+</div>
+
+<!-- ══ MEDIDAS ══ -->
+<div id="page-medidas" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-family:var(--font-d);font-size:18px;font-weight:700">Medidas corporales</div>
+    <button class="btn btn-p btn-sm" onclick="openModal('modal-medidas')">+ Registrar semana</button>
+  </div>
+  <div id="med-empty" class="empty"><div class="empty-icon">📏</div><h3>Sin medidas</h3><p>Registra tus medidas cada lunes en ayunas</p></div>
+  <div id="med-content" style="display:none">
+    <div class="card"><div class="card-title">Última medición</div><div class="measure-grid" id="last-measures"></div></div>
+    <div class="card"><div class="card-title">Progreso de peso</div><div class="chart-bar-wrap" id="weight-chart"></div></div>
+    <div class="card"><div class="card-title">Historial</div><div id="med-hist"></div></div>
+  </div>
+</div>
+
+<!-- ══ ALACENA ══ -->
+<div id="page-alacena" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-family:var(--font-d);font-size:18px;font-weight:700">Mi alacena</div>
+    <div class="btn-row"><button class="btn btn-p btn-sm" onclick="openModal('modal-pantry')">+ Agregar</button><button class="btn btn-s btn-sm" onclick="sugerirConAlacena()">✦ ¿Qué preparo?</button></div>
+  </div>
+  <div class="g3" style="margin-bottom:12px">
+    <div class="stat" style="cursor:pointer" onclick="filterPantry('todos')"><div class="stat-val" id="pc-todos">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterPantry('refrigerador')"><div class="stat-val" id="pc-ref">0</div><div class="stat-lbl">Refrigerador</div></div>
+    <div class="stat" style="cursor:pointer" onclick="filterPantry('despensa')"><div class="stat-val" id="pc-des">0</div><div class="stat-lbl">Despensa</div></div>
+  </div>
+  <div id="pantry-list"></div>
+  <div id="pantry-sug" style="display:none" class="card"><div class="card-title">✦ Ideas con tu alacena</div><div id="pantry-sug-out"></div></div>
+</div>
+
+<!-- ══ HISTORIAL ══ -->
+<div id="page-historial" class="page">
+  <div style="font-family:var(--font-d);font-size:18px;font-weight:700;margin-bottom:14px">Historial de planes</div>
+  <div id="hist-empty" class="empty"><div class="empty-icon">📋</div><h3>Sin historial</h3><p>Aquí aparecerán tus semanas anteriores</p></div>
+  <div id="hist-content" style="display:none"></div>
+</div>
+
+</div></div>
+
+<!-- MODALES -->
+<div class="modal-bg" id="modal-medidas">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-medidas')">×</button>
+    <h3>📏 Medidas semanales</h3>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">En ayunas, misma hora cada semana</p>
+    <div class="g2"><div><label>Fecha</label><input type="date" id="m-fecha"></div><div><label>Peso (kg)</label><input type="number" id="m-peso" step="0.1" placeholder="78.5"></div></div>
+    <div class="g2" style="margin-top:10px"><div><label>Cintura (cm)</label><input type="number" id="m-cintura" placeholder="84"></div><div><label>Cadera (cm)</label><input type="number" id="m-cadera" placeholder="96"></div></div>
+    <div class="g2" style="margin-top:10px"><div><label>Pecho (cm)</label><input type="number" id="m-pecho" placeholder="95"></div><div><label>Brazo der. (cm)</label><input type="number" id="m-brazo" placeholder="34"></div></div>
+    <div class="g2" style="margin-top:10px"><div><label>Muslo der. (cm)</label><input type="number" id="m-muslo" placeholder="56"></div><div><label>Pantorrilla (cm)</label><input type="number" id="m-panto" placeholder="36"></div></div>
+    <div style="margin-top:10px"><label>Notas</label><textarea id="m-notas" placeholder="Sin novedad..."></textarea></div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-p" onclick="saveMeasure()">Guardar</button><button class="btn btn-s" onclick="closeModal('modal-medidas')">Cancelar</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="modal-pantry">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-pantry')">×</button>
+    <h3>🧺 Agregar ingrediente</h3>
+    <div style="margin-top:10px"><label>Nombre</label><input type="text" id="pa-nombre" placeholder="Pechuga de pollo"></div>
+    <div class="g2" style="margin-top:10px">
+      <div><label>Cantidad</label><input type="text" id="pa-qty" placeholder="400g / suficiente"></div>
+      <div><label>Ubicación</label><select id="pa-loc"><option value="refrigerador">Refrigerador</option><option value="despensa">Despensa</option><option value="congelador">Congelador</option></select></div>
+    </div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-p" onclick="savePantryItem()">Agregar</button><button class="btn btn-s" onclick="closeModal('modal-pantry')">Cancelar</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="modal-replace">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-replace')">×</button>
+    <h3 id="rep-title">Registrar reemplazo</h3>
+    <div style="margin-top:10px"><label>¿Qué comiste?</label><input type="text" id="rep-nombre" placeholder="Yogurt griego con granola"></div>
+    <div class="g4" style="margin-top:10px">
+      <div><label>Kcal</label><input type="number" id="rep-kcal" placeholder="210"></div>
+      <div><label>Prot (g)</label><input type="number" id="rep-prot" placeholder="14"></div>
+      <div><label>Carb (g)</label><input type="number" id="rep-carb" placeholder="28"></div>
+      <div><label>Grasa (g)</label><input type="number" id="rep-fat" placeholder="5"></div>
+    </div>
+    <div style="margin-top:10px"><label>Notas</label><textarea id="rep-notas" placeholder="No había los ingredientes..."></textarea></div>
+    <div class="btn-row" style="margin-top:14px"><button class="btn btn-p" onclick="saveReplace()">Guardar</button><button class="btn btn-s" onclick="closeModal('modal-replace')">Cancelar</button></div>
+  </div>
+</div>
+
+<div class="loading" id="loading"><div class="spinner"></div><div class="loading-msg" id="loading-msg">Cargando...</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIGURACIÓN — edita estas 2 líneas si no usas la pantalla Config
+// ══════════════════════════════════════════════════
+let GEMINI_KEY = '';
+let APPS_SCRIPT_URL = '';
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let S = {
+  plan: null, rutina: null,
+  measures: [], pantry: [], adherencia: {}, historial: [], progresion: {},
+  sheetData: { alimentos: [], recetas: [], perfil: null, alacena: [] },
+  activeDayIdx: 0, adhDayIdx: 0, replaceCtx: null, pantryFilter: 'todos',
+};
+
+const DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const COMIDAS = [
+  {id:'desayuno',lbl:'Desayuno',hora:'7:00 am'},
+  {id:'mediaMañana',lbl:'Media mañana',hora:'10:30 am'},
+  {id:'almuerzo',lbl:'Almuerzo',hora:'1:00 pm'},
+  {id:'mediaTarde',lbl:'Media tarde',hora:'4:30 pm'},
+  {id:'cena',lbl:'Cena',hora:'7:30 pm'},
+];
+
+function save() { try { localStorage.setItem('ppro', JSON.stringify(S)); } catch(e){} }
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem('ppro') || 'null');
+    if (d) S = {...S, ...d};
+  } catch(e){}
+  GEMINI_KEY = localStorage.getItem('ppro_gemini') || '';
+  APPS_SCRIPT_URL = localStorage.getItem('ppro_script') || '';
+}
+
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+function guardarConfig() {
+  GEMINI_KEY = document.getElementById('cfg-gemini').value.trim();
+  APPS_SCRIPT_URL = document.getElementById('cfg-script').value.trim();
+  localStorage.setItem('ppro_gemini', GEMINI_KEY);
+  localStorage.setItem('ppro_script', APPS_SCRIPT_URL);
+  toast('✓ Configuración guardada');
+}
+async function testConexion() {
+  if (!APPS_SCRIPT_URL) { toast('Ingresa la URL del Apps Script primero'); return; }
+  const res = document.getElementById('test-result');
+  res.style.display = 'block';
+  res.textContent = 'Probando conexión...';
+  res.style.background = 'var(--s2)';
+  try {
+    const r = await fetch(APPS_SCRIPT_URL + '?accion=leerTodo');
+    const d = await r.json();
+    if (d.ok) {
+      S.sheetData = { alimentos: d.alimentos||[], recetas: d.recetas||[], perfil: d.perfil?.[0]||null, alacena: d.alacena||[] };
+      save();
+      setSyncOk();
+      res.style.background = 'rgba(78,203,141,.08)';
+      res.style.color = 'var(--a2)';
+      res.textContent = `✓ Conexión exitosa. Alimentos: ${d.alimentos?.length||0} · Recetas: ${d.recetas?.length||0} · Alacena: ${d.alacena?.length||0}`;
+      renderSheetsStatus(d);
+    } else {
+      throw new Error(d.error || 'Respuesta inválida');
+    }
+  } catch(e) {
+    setSyncErr();
+    res.style.background = 'rgba(232,107,75,.08)';
+    res.style.color = 'var(--a4)';
+    res.textContent = '✕ Error: ' + e.message + '. Verifica la URL y que el Apps Script esté publicado como "Cualquier persona".';
+  }
+}
+function renderSheetsStatus(d) {
+  const el = document.getElementById('sheets-status');
+  const hojas = [
+    {n:'Alimentos', count: d.alimentos?.length||0},
+    {n:'Recetas', count: d.recetas?.length||0},
+    {n:'Perfil', count: d.perfil?.length||0},
+    {n:'Alacena', count: d.alacena?.length||0},
+  ];
+  el.innerHTML = hojas.map(h => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${h.n}</span>
+      <span class="pill ${h.count>0?'p-ok':'p-warn'}">${h.count>0?h.count+' filas':'Vacía'}</span>
+    </div>`).join('');
+}
+function setSyncOk() { document.getElementById('sync-dot').className='sync-dot ok'; document.getElementById('sync-status').textContent='Sheets conectado'; }
+function setSyncErr() { document.getElementById('sync-dot').className='sync-dot err'; document.getElementById('sync-status').textContent='Sin conexión a Sheets'; }
+function setSyncLoading() { document.getElementById('sync-dot').className='sync-dot loading'; document.getElementById('sync-status').textContent='Sincronizando...'; }
+
+// ══════════════════════════════════════════════════
+// SHEETS API
+// ══════════════════════════════════════════════════
+async function sheetGet(accion, params='') {
+  const r = await fetch(`${APPS_SCRIPT_URL}?accion=${accion}${params}`);
+  return r.json();
+}
+async function sheetPost(accion, datos) {
+  const r = await fetch(APPS_SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify({accion, datos}),
+  });
+  return r.json();
+}
+
+// ══════════════════════════════════════════════════
+// PERFIL
+// ══════════════════════════════════════════════════
+function cycleM(el) {
+  const lvls=['low','med','high'];
+  const next = lvls[(lvls.indexOf(el.dataset.l)+1)%3];
+  el.dataset.l = next; el.className='mbtn '+next;
+}
+function getMuscles() {
+  const o={};
+  document.querySelectorAll('#muscle-grid .mbtn').forEach(b=>{ o[b.dataset.m]=b.dataset.l; });
+  return o;
+}
+function getProfileUI() {
+  return {
+    peso_kg: +document.getElementById('p-peso').value,
+    talla_cm: +document.getElementById('p-talla').value,
+    edad: +document.getElementById('p-edad').value,
+    sexo: document.getElementById('p-sexo').value,
+    nivel_actividad: +document.getElementById('p-act').value,
+    meta: document.getElementById('p-meta').value,
+    lugar_entrenamiento: document.getElementById('p-lugar').value,
+    dias_entrenamiento: +document.getElementById('p-dias').value,
+    restricciones: document.getElementById('p-rest').value,
+    alergias: document.getElementById('p-aler').value,
+    musculos: getMuscles(),
+  };
+}
+function calcTDEE(p) {
+  const bmr = p.sexo==='M' ? 10*p.peso_kg+6.25*p.talla_cm-5*p.edad+5 : 10*p.peso_kg+6.25*p.talla_cm-5*p.edad-161;
+  return Math.round(bmr * p.nivel_actividad);
+}
+function calcMacros(tdee, meta, peso) {
+  let kcal=tdee;
+  if(meta==='deficit') kcal=Math.round(tdee*.82);
+  if(meta==='superavit') kcal=Math.round(tdee*1.12);
+  const pm={recomp:2.4,deficit:2.2,superavit:2.0,mant:1.8}[meta]||2.0;
+  const prot=Math.round(peso*pm), fat=Math.round(kcal*.27/9), carb=Math.round((kcal-prot*4-fat*9)/4);
+  return {kcal,prot,carb,fat};
+}
+function verMacros() {
+  const p=getProfileUI(); const tdee=calcTDEE(p); const m=calcMacros(tdee,p.meta,p.peso_kg);
+  document.getElementById('macro-grid').innerHTML=`
+    <div class="stat"><div class="stat-val">${tdee}</div><div class="stat-lbl">TDEE</div></div>
+    <div class="stat"><div class="stat-val">${m.kcal}</div><div class="stat-lbl">kcal objetivo</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a2)">${m.prot}g</div><div class="stat-lbl">Proteína</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a3)">${m.carb}g</div><div class="stat-lbl">Carbos</div></div>`;
+  document.getElementById('macro-preview').style.display='block';
+}
+async function guardarPerfil() {
+  const p=getProfileUI(); const tdee=calcTDEE(p); const m=calcMacros(tdee,p.meta,p.peso_kg);
+  const datos={...p, tdee, kcal_objetivo:m.kcal, prot_g:m.prot, carb_g:m.carb, grasa_g:m.fat,
+    prioridad_alta: Object.entries(p.musculos).filter(([,v])=>v==='high').map(([k])=>k).join(','),
+    prioridad_media: Object.entries(p.musculos).filter(([,v])=>v==='med').map(([k])=>k).join(','),
+    fecha_actualizacion: new Date().toISOString().slice(0,10)};
+  localStorage.setItem('ppro_perfil', JSON.stringify(datos));
+  if (APPS_SCRIPT_URL) {
+    setSyncLoading();
+    try { await sheetPost('guardarPerfil', datos); setSyncOk(); } catch(e){ setSyncErr(); }
+  }
+  toast('✓ Perfil guardado');
+}
+
+// ══════════════════════════════════════════════════
+// GENERAR PLAN CON GEMINI + DATOS DE SHEETS
+// ══════════════════════════════════════════════════
+async function generarPlan() {
+  if (!GEMINI_KEY) { toast('Configura tu API Key de Gemini primero'); nav('config'); return; }
+  const p = getProfileUI();
+  const tdee = calcTDEE(p); const m = calcMacros(tdee, p.meta, p.peso_kg);
+  const hi = Object.entries(p.musculos).filter(([,v])=>v==='high').map(([k])=>k).join(', ')||'equilibrado';
+  const med = Object.entries(p.musculos).filter(([,v])=>v==='med').map(([k])=>k).join(', ')||'ninguno';
+  const lugarLabel = {gym:'gimnasio',casa:'casa sin equipos',mixto:'mixto gym y casa'}[p.lugar_entrenamiento]||'gimnasio';
+  const metaLabel = {recomp:'recomposición corporal',deficit:'déficit calórico',superavit:'superávit para ganar masa',mant:'mantenimiento'}[p.meta];
+
+  // Preparar datos de Sheets para el prompt
+  const recetasDisp = S.sheetData.recetas.filter(r=>r.disponible!=='NO').slice(0,40);
+  const alimentosTop = S.sheetData.alimentos.slice(0,30);
+  const histPrev = S.historial.length > 0
+    ? 'Almuerzos recientes a evitar: '+S.historial[0]?.dias?.map(d=>d.comidas?.almuerzo?.nombre).filter(Boolean).join(', ')
+    : '';
+  const tieneRecetas = recetasDisp.length > 0;
+  const recetasCtx = tieneRecetas
+    ? 'Usa PREFERENTEMENTE estas recetas de mi base de datos:\n' + recetasDisp.map(r=>`- ${r.nombre} (${r.categoria_plato}): proteína ${r.proteina_g}g, carb ${r.carb_g}g, método: ${r.metodo_coccion||'variado'}`).join('\n')
+    : 'No tengo recetas cargadas aún, usa platos peruanos tradicionales.';
+
+  const msgs=['Leyendo tus recetas de Sheets...','Calculando macros...','Armando menú sin repeticiones...','Diseñando rutina personalizada...','Casi listo...'];
+  let mi=0; showLoading(msgs[0]);
+  const iv=setInterval(()=>{mi=(mi+1)%msgs.length;document.getElementById('loading-msg').textContent=msgs[mi];},1800);
+
+  const prompt = `Eres nutricionista deportivo y entrenador especializado en cocina peruana. Genera SOLO JSON válido sin texto extra.
+
+PERFIL:
+- Macros objetivo: ${m.kcal} kcal | ${m.prot}g proteína | ${m.carb}g carbos | ${m.fat}g grasa
+- Meta: ${metaLabel} | Lugar: ${lugarLabel}
+- Días entrenamiento: ${p.dias_entrenamiento}/semana
+- Prioridad muscular ALTA: ${hi} (${Math.min(3,p.dias_entrenamiento)} sesiones/semana)
+- Prioridad muscular MEDIA: ${med}
+- Restricciones: ${p.restricciones||'ninguna'} | Alergias: ${p.alergias||'ninguna'}
+${histPrev}
+
+RECETAS DISPONIBLES:
+${recetasCtx}
+
+REGLAS COMIDAS:
+- 5 comidas por día con horarios: desayuno 7am, media mañana 10:30am, almuerzo 1pm, media tarde 4:30pm, cena 7:30pm
+- Para cada ingrediente especifica gramos crudos y cocidos: "Arroz: 65g crudo → 169g cocido"
+- NO repetir el mismo plato en los 7 días
+- Macros por comida deben sumar la meta diaria
+- Si tienes recetas disponibles úsalas priorizando las disponibles=SI
+
+REGLAS RUTINA:
+- Solo ${p.dias_entrenamiento} días de entrenamiento en la semana
+- Distribuye estratégicamente: grupos prioritarios tienen más sesiones
+- Ejercicios apropiados para ${lugarLabel}
+- 4-5 ejercicios por sesión con series x reps
+- tipo_jornada: "entrenamiento_pesado"|"entrenamiento_ligero"|"descanso_activo"|"descanso_total"
+
+Devuelve EXACTAMENTE:
+{"macrosDia":{"kcal":${m.kcal},"prot":${m.prot},"carb":${m.carb},"fat":${m.fat}},"dias":[{"nombre":"Lunes","tipo_jornada":"entrenamiento_pesado","comidas":{"desayuno":{"nombre":"...","ingredientes":"...","kcal":0,"prot":0,"carb":0,"fat":0},"mediaMañana":{"nombre":"...","ingredientes":"...","kcal":0,"prot":0,"carb":0,"fat":0},"almuerzo":{"nombre":"...","ingredientes":"...","kcal":0,"prot":0,"carb":0,"fat":0},"mediaTarde":{"nombre":"...","ingredientes":"...","kcal":0,"prot":0,"carb":0,"fat":0},"cena":{"nombre":"...","ingredientes":"...","kcal":0,"prot":0,"carb":0,"fat":0}},"ejercicio":{"grupo":"Piernas · Glúteos","enfoque":"...","tipo":"piernas","ejercicios":[{"nombre":"...","series":"4x10","musculo":"...","peso_sugerido":""}]}}]}
+Genera los 7 días completos.`;
+
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:8000}})
+    });
+    const d = await r.json();
+    clearInterval(iv); hideLoading();
+    if (d.error) throw new Error(d.error.message);
+    let raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    raw = raw.replace(/```json|```/g,'').trim();
+    const json = JSON.parse(raw);
+    S.plan = json; S.activeDayIdx=0; S.adhDayIdx=0;
+    guardarHistorialLocal(json);
+    save();
+    // Guardar en Sheets
+    if (APPS_SCRIPT_URL) {
+      setSyncLoading();
+      try {
+        const hoy = new Date();
+        const calDias = json.dias.map((dia,i)=>{
+          const f = new Date(hoy); f.setDate(hoy.getDate() - hoy.getDay() + 1 + i);
+          return {
+            fecha: f.toISOString().slice(0,10),
+            dia_semana: dia.nombre, tipo_jornada: dia.tipo_jornada,
+            plan_origen: 'semanal_'+hoy.toISOString().slice(0,10),
+            receta_almuerzo_id: dia.comidas?.almuerzo?.nombre||'',
+            kcal_dia: json.macrosDia.kcal, prot_dia: json.macrosDia.prot,
+            carb_dia: json.macrosDia.carb, grasa_dia: json.macrosDia.fat,
+            estado_dia: 'planificado'
+          };
+        });
+        await sheetPost('guardarCalendario', calDias);
+        setSyncOk();
+      } catch(e){ setSyncErr(); }
+    }
+    renderPlan(); renderRutina(); nav('plan');
+    toast('✦ Plan generado con tus recetas');
+  } catch(e) {
+    clearInterval(iv); hideLoading();
+    alert('Error: '+e.message);
+  }
+}
+
+async function generarDiaAislado() {
+  toast('Generando día extra... (usa el mismo flujo que el plan semanal)');
+}
+
+// ══════════════════════════════════════════════════
+// RENDER PLAN
+// ══════════════════════════════════════════════════
+function renderPlan() {
+  if (!S.plan) return;
+  document.getElementById('plan-empty').style.display='none';
+  document.getElementById('plan-content').style.display='block';
+  const m=S.plan.macrosDia;
+  document.getElementById('plan-pills').innerHTML=`<span class="pill p-cal">${m.kcal} kcal</span><span class="pill p-pro">${m.prot}g prot</span><span class="pill p-car">${m.carb}g carb</span><span class="pill p-fat">${m.fat}g grasa</span>`;
+  buildTabs('day-tabs',S.activeDayIdx,i=>{S.activeDayIdx=i;save();renderDayMeals('meals-out',S.plan.dias[i],i,false);});
+  renderDayMeals('meals-out',S.plan.dias[S.activeDayIdx],S.activeDayIdx,false);
+}
+function buildTabs(cid, activeIdx, onClick) {
+  const el=document.getElementById(cid); el.innerHTML='';
+  S.plan.dias.forEach((d,i)=>{
+    const btn=document.createElement('button');
+    const isTrain=d.tipo_jornada&&!d.tipo_jornada.includes('descanso');
+    btn.className='dtab '+(isTrain?'train':'')+(i===activeIdx?' on':'');
+    btn.textContent=d.nombre.slice(0,3).toUpperCase();
+    btn.onclick=()=>{el.querySelectorAll('.dtab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');onClick(i);};
+    el.appendChild(btn);
+  });
+}
+function renderDayMeals(cid, dia, dayIdx, showCheck) {
+  const el=document.getElementById(cid); el.innerHTML='';
+  const jLabel={entrenamiento_pesado:'💪 Entrenamiento pesado',entrenamiento_ligero:'🏃 Entrenamiento ligero',descanso_activo:'🚶 Descanso activo',descanso_total:'😴 Descanso total'};
+  const jColor={entrenamiento_pesado:'var(--a2)',entrenamiento_ligero:'var(--a3)',descanso_activo:'var(--muted)',descanso_total:'var(--muted)'};
+  const jDiv=document.createElement('div');
+  jDiv.style.cssText=`font-size:12px;font-weight:700;color:${jColor[dia.tipo_jornada]||'var(--muted)'};margin-bottom:10px;padding:7px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border)`;
+  jDiv.textContent=(jLabel[dia.tipo_jornada]||dia.tipo_jornada||'')+(dia.ejercicio?.grupo?' · '+dia.ejercicio.grupo:'');
+  el.appendChild(jDiv);
+  COMIDAS.forEach(c=>{
+    const comida=dia.comidas?.[c.id]; if(!comida) return;
+    const adh=S.adherencia?.[dayIdx]?.[c.id];
+    const card=document.createElement('div'); card.className='meal';
+    let chk='';
+    if(showCheck){
+      const aStatus=adh?.status;
+      chk=`<div class="meal-check">
+        <span style="font-size:11px;color:var(--muted)">¿Lo comiste?</span>
+        <button class="check-btn ${aStatus==='cumplido'?'ok':''}" onclick="markMeal(${dayIdx},'${c.id}','cumplido')">✓ Sí</button>
+        <button class="check-btn ${aStatus==='reemplazado'?'rep':''}" onclick="openReplace(${dayIdx},'${c.id}','${comida.nombre.replace(/'/g,'&#39;')}')">↔ Cambié</button>
+        <button class="check-btn ${aStatus==='omitido'?'skip':''}" onclick="markMeal(${dayIdx},'${c.id}','omitido')">✕ No comí</button>
+        ${adh?`<span class="pill ${adh.status==='cumplido'?'p-ok':adh.status==='reemplazado'?'p-warn':'p-err'}">${adh.status==='cumplido'?'✓':adh.status==='reemplazado'?'↔':'✕'} ${adh.status}</span>`:''}
+      </div>`;
+    }
+    card.innerHTML=`<div class="meal-head">
+      <div class="meal-time"><span class="t">${c.hora}</span><span class="l">${c.lbl}</span></div>
+      <div class="meal-body"><div class="meal-name">${comida.nombre}</div><div class="meal-ing">${comida.ingredientes}</div></div>
+      <div class="meal-macros"><div class="meal-kcal">${comida.kcal}<span style="font-size:10px;font-weight:400;color:var(--muted)"> kcal</span></div><div class="meal-md">P:${comida.prot}g C:${comida.carb}g G:${comida.fat}g</div></div>
+    </div>${chk}`;
+    el.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// ADHERENCIA
+// ══════════════════════════════════════════════════
+function renderAdherencia() {
+  if(!S.plan){return;}
+  document.getElementById('adh-empty').style.display='none';
+  document.getElementById('adh-content').style.display='block';
+  // week dots
+  const wg=document.getElementById('adh-week'); wg.innerHTML='';
+  S.plan.dias.forEach((d,i)=>{
+    const adh=S.adherencia[i]||{};
+    const done=Object.values(adh).filter(v=>v.status==='cumplido').length;
+    const rep=Object.values(adh).filter(v=>v.status==='reemplazado').length;
+    const skip=Object.values(adh).filter(v=>v.status==='omitido').length;
+    const cls=done+rep>=COMIDAS.length?'ok':skip>0?'miss':done+rep>0?'part':'';
+    wg.innerHTML+=`<div class="week-day"><div class="week-day-name">${d.nombre.slice(0,3)}</div><div class="week-dot ${cls}"></div><div style="font-size:9px;color:var(--muted)">${done+rep}/${COMIDAS.length}</div></div>`;
+  });
+  // stats
+  let cum=0,rep=0,omi=0,tot=0;
+  Object.values(S.adherencia).forEach(dia=>Object.values(dia).forEach(c=>{tot++;if(c.status==='cumplido')cum++;else if(c.status==='reemplazado')rep++;else if(c.status==='omitido')omi++;}));
+  const pct=tot>0?Math.round((cum+rep)*100/tot):0;
+  document.getElementById('adh-stats').innerHTML=`
+    <div class="stat"><div class="stat-val" style="color:var(--a2)">${pct}%</div><div class="stat-lbl">Adherencia</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a2)">${cum}</div><div class="stat-lbl">Cumplidas</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--accent)">${rep}</div><div class="stat-lbl">Reemplazadas</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--a4)">${omi}</div><div class="stat-lbl">Omitidas</div></div>`;
+  buildTabs('adh-tabs',S.adhDayIdx,i=>{S.adhDayIdx=i;save();renderDayMeals('adh-meals',S.plan.dias[i],i,true);});
+  renderDayMeals('adh-meals',S.plan.dias[S.adhDayIdx],S.adhDayIdx,true);
+}
+async function markMeal(dayIdx,mealId,status) {
+  if(!S.adherencia[dayIdx]) S.adherencia[dayIdx]={};
+  S.adherencia[dayIdx][mealId]={status,ts:Date.now()};
+  save();
+  // Sincronizar con Sheets
+  if(APPS_SCRIPT_URL){
+    try{
+      const dia=S.plan.dias[dayIdx];
+      const hoy=new Date();
+      const f=new Date(hoy); f.setDate(hoy.getDate()-hoy.getDay()+1+dayIdx);
+      await sheetPost('guardarAdherencia',{
+        fecha:f.toISOString().slice(0,10), tipo_comida:mealId, estado:status,
+        receta_id_planificada:dia.comidas?.[mealId]?.nombre||'', fuente_calculo:'manual'
+      });
+    }catch(e){}
+  }
+  renderAdherencia();
+  toast(status==='cumplido'?'✓ Registrado':'Actualizado');
+}
+function openReplace(dayIdx,mealId,nombre) {
+  S.replaceCtx={dayIdx,mealId};
+  document.getElementById('rep-title').textContent='Cambié: '+nombre;
+  ['rep-nombre','rep-kcal','rep-prot','rep-carb','rep-fat','rep-notas'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-replace');
+}
+async function saveReplace() {
+  if(!S.replaceCtx) return;
+  const {dayIdx,mealId}=S.replaceCtx;
+  if(!S.adherencia[dayIdx]) S.adherencia[dayIdx]={};
+  const real={nombre:document.getElementById('rep-nombre').value,kcal:+document.getElementById('rep-kcal').value,prot:+document.getElementById('rep-prot').value,carb:+document.getElementById('rep-carb').value,fat:+document.getElementById('rep-fat').value,notas:document.getElementById('rep-notas').value};
+  S.adherencia[dayIdx][mealId]={status:'reemplazado',real,ts:Date.now()};
+  save();
+  if(APPS_SCRIPT_URL){
+    try{
+      const hoy=new Date(); const f=new Date(hoy); f.setDate(hoy.getDate()-hoy.getDay()+1+dayIdx);
+      await sheetPost('guardarAdherencia',{fecha:f.toISOString().slice(0,10),tipo_comida:mealId,estado:'reemplazado',descripcion_libre:real.nombre,kcal_real:real.kcal,prot_real:real.prot,carb_real:real.carb,grasa_real:real.fat,notas:real.notas,fuente_calculo:'manual'});
+    }catch(e){}
+  }
+  closeModal('modal-replace'); renderAdherencia(); toast('↔ Reemplazo guardado');
+}
+
+// ══════════════════════════════════════════════════
+// SCAN ETIQUETA
+// ══════════════════════════════════════════════════
+async function scanLabel(input) {
+  if(!input.files[0]||!GEMINI_KEY) return;
+  const file=input.files[0];
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+  showLoading('Leyendo etiqueta nutricional...');
+  try {
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:file.type,data:b64}},{text:'Extrae los valores nutricionales. Devuelve SOLO JSON: {"nombre_producto":"...","porcion_g":0,"kcal":0,"prot":0,"carb":0,"grasa":0}'}]}]})
+    });
+    const d=await r.json(); hideLoading();
+    let raw=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const nu=JSON.parse(raw);
+    document.getElementById('scan-result').style.display='block';
+    document.getElementById('scan-result').innerHTML=`
+      <div style="font-weight:600;font-size:14px;margin-bottom:8px">${nu.nombre_producto||'Producto'}</div>
+      <div class="pills-row" style="margin-bottom:10px"><span class="pill p-cal">${nu.kcal} kcal</span><span class="pill p-pro">${nu.prot}g prot</span><span class="pill p-car">${nu.carb}g carb</span><span class="pill p-fat">${nu.grasa}g grasa</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Por porción de ${nu.porcion_g}g</div>
+      <button class="btn btn-g btn-sm" onclick='useScan(${JSON.stringify(nu)})'>Registrar como comida</button>`;
+  } catch(e) { hideLoading(); toast('No se pudo leer la etiqueta'); }
+}
+function useScan(nu) {
+  document.getElementById('rep-nombre').value=nu.nombre_producto||'';
+  document.getElementById('rep-kcal').value=nu.kcal||'';
+  document.getElementById('rep-prot').value=nu.prot||'';
+  document.getElementById('rep-carb').value=nu.carb||'';
+  document.getElementById('rep-fat').value=nu.grasa||'';
+  openModal('modal-replace'); toast('Datos cargados desde etiqueta');
+}
+
+// ══════════════════════════════════════════════════
+// RUTINA
+// ══════════════════════════════════════════════════
+function renderRutina() {
+  if(!S.plan) return;
+  document.getElementById('rut-empty').style.display='none';
+  document.getElementById('rut-content').style.display='block';
+  const p=JSON.parse(localStorage.getItem('ppro_perfil')||'{}');
+  document.getElementById('rut-lugar').textContent={gym:'🏋️ Gimnasio',casa:'🏠 Casa',mixto:'🔀 Mixto'}[p.lugar_entrenamiento||'gym']||'🏋️ Gym';
+  const out=document.getElementById('rut-out'); out.innerHTML='';
+  const badgeMap={piernas:'b-legs',glúteos:'b-legs',espalda:'b-pull',jalón:'b-pull',empuje:'b-push',pecho:'b-push',completo:'b-full'};
+  S.plan.dias.forEach((dia,di)=>{
+    const ej=dia.ejercicio;
+    const isRest=!ej?.ejercicios?.length||dia.tipo_jornada?.includes('descanso');
+    const tipo=(ej?.tipo||'').toLowerCase();
+    const badgeCls=Object.entries(badgeMap).find(([k])=>tipo.includes(k))?.[1]||(isRest?'b-rest':'b-push');
+    const div=document.createElement('div'); div.className='ex-day';
+    let exHtml='';
+    if(!isRest&&ej?.ejercicios?.length){
+      exHtml='<div class="ex-list">'+ej.ejercicios.map((e,i)=>{
+        const hist=S.progresion[e.nombre]?.slice(-1)[0];
+        const sug=hist?`↑ ${(parseFloat(hist.peso)*1.05).toFixed(1)}kg`:(e.peso_sugerido?`~${e.peso_sugerido}`:'—');
+        return `<div class="ex-row">
+          <div class="ex-num">${i+1}</div>
+          <div style="flex:1"><div class="ex-name">${e.nombre}</div><div class="ex-muscle">${e.musculo}</div></div>
+          <div style="text-align:right"><div class="ex-sets">${e.series}</div><div class="ex-weight">${sug}</div></div>
+          <input type="number" placeholder="kg usado" style="width:80px;margin-left:6px" onchange="registrarPeso('${e.nombre}',this.value,'${dia.nombre}',${di+1},${i+1})">
+        </div>`;}).join('')+'</div>';
+    } else {
+      exHtml=`<div style="padding:12px 15px;font-size:12px;color:var(--muted)">🚶 Descanso activo · Caminata 30 min · Estiramientos y movilidad</div>`;
+    }
+    div.innerHTML=`<div class="ex-day-hd"><div><div class="ex-day-title">${dia.nombre}</div><div class="ex-day-sub">${ej?.grupo||''} ${ej?.enfoque?'· '+ej.enfoque:''}</div></div><span class="badge ${badgeCls}">${ej?.tipo||'Descanso'}</span></div>${exHtml}`;
+    out.appendChild(div);
+  });
+}
+async function registrarPeso(ejercicio,peso,dia,rutinaId,exNum) {
+  if(!peso) return;
+  if(!S.progresion[ejercicio]) S.progresion[ejercicio]=[];
+  S.progresion[ejercicio].push({fecha:new Date().toISOString().slice(0,10),dia,peso});
+  save();
+  if(APPS_SCRIPT_URL){
+    try{ await sheetPost('actualizarPesoEjercicio',{rutina_id:rutinaId,ejercicio_num:exNum,peso_kg:peso}); }catch(e){}
+  }
+  toast(`✓ ${peso}kg guardado · próxima sesión: ${(peso*1.05).toFixed(1)}kg`);
+}
+
+// ══════════════════════════════════════════════════
+// MEDIDAS
+// ══════════════════════════════════════════════════
+async function saveMeasure() {
+  const entry={
+    fecha:document.getElementById('m-fecha').value, semana_num:'S'+S.measures.length.toString().padStart(2,'0'),
+    peso_kg:+document.getElementById('m-peso').value, cintura_cm:+document.getElementById('m-cintura').value,
+    cadera_cm:+document.getElementById('m-cadera').value, pecho_cm:+document.getElementById('m-pecho').value,
+    brazo_der_cm:+document.getElementById('m-brazo').value, muslo_der_cm:+document.getElementById('m-muslo').value,
+    pantorrilla_cm:+document.getElementById('m-panto').value, notas:document.getElementById('m-notas').value,
+  };
+  if(!entry.fecha||!entry.peso_kg){toast('Completa fecha y peso');return;}
+  S.measures.push(entry); S.measures.sort((a,b)=>a.fecha>b.fecha?1:-1); save();
+  if(APPS_SCRIPT_URL){ try{ await sheetPost('guardarMedida',entry); setSyncOk(); }catch(e){ setSyncErr(); } }
+  closeModal('modal-medidas'); renderMedidas();
+  document.getElementById('p-peso').value=entry.peso_kg;
+  toast('✓ Medidas guardadas en Sheets');
+}
+function renderMedidas() {
+  if(!S.measures.length) return;
+  document.getElementById('med-empty').style.display='none';
+  document.getElementById('med-content').style.display='block';
+  const last=S.measures[S.measures.length-1];
+  const prev=S.measures.length>1?S.measures[S.measures.length-2]:null;
+  const fields=[{k:'peso_kg',l:'Peso',u:'kg'},{k:'cintura_cm',l:'Cintura',u:'cm'},{k:'cadera_cm',l:'Cadera',u:'cm'},{k:'pecho_cm',l:'Pecho',u:'cm'},{k:'brazo_der_cm',l:'Brazo',u:'cm'},{k:'muslo_der_cm',l:'Muslo',u:'cm'},{k:'pantorrilla_cm',l:'Pantorrilla',u:'cm'}];
+  const grid=document.getElementById('last-measures'); grid.innerHTML='';
+  fields.forEach(f=>{
+    if(!last[f.k]) return;
+    const delta=prev&&prev[f.k]?last[f.k]-prev[f.k]:null;
+    const ds=delta!==null?(delta>=0?`+${delta.toFixed(1)}`:delta.toFixed(1)):'';
+    const dc=delta!==null?(f.k==='peso_kg'||f.k==='cintura_cm'||f.k==='cadera_cm'?(delta<0?'delta-neg':'delta-pos'):(delta>0?'delta-neg':'delta-pos')):'';
+    grid.innerHTML+=`<div class="measure-item"><div class="measure-val">${last[f.k]}</div><div class="measure-unit">${f.u}</div><div class="measure-lbl">${f.l}</div>${ds?`<div class="measure-delta ${dc}">${ds} ${f.u}</div>`:''}</div>`;
+  });
+  const wc=document.getElementById('weight-chart'); wc.innerHTML='';
+  const weights=S.measures.map(m=>m.peso_kg).filter(Boolean);
+  const mx=Math.max(...weights), mn=Math.min(...weights), rng=mx-mn||1;
+  S.measures.slice(-8).forEach(m=>{
+    const pct=((m.peso_kg-mn)/rng*70+15);
+    wc.innerHTML+=`<div class="chart-row"><div class="chart-lbl">${m.fecha.slice(5)}</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--a2),var(--accent))"></div></div><div class="chart-val">${m.peso_kg}kg</div></div>`;
+  });
+  const hist=document.getElementById('med-hist'); hist.innerHTML='';
+  [...S.measures].reverse().forEach(m=>{
+    hist.innerHTML+=`<div class="hist-entry"><div class="hist-date">${m.fecha} ${m.semana_num||''} ${m.notas?'· '+m.notas:''}</div><div class="pills-row"><span class="pill p-cal">${m.peso_kg}kg</span>${m.cintura_cm?`<span class="pill p-car">Cin:${m.cintura_cm}cm</span>`:''} ${m.cadera_cm?`<span class="pill p-pro">Cad:${m.cadera_cm}cm</span>`:''} ${m.muslo_der_cm?`<span class="pill p-fat">Mus:${m.muslo_der_cm}cm</span>`:''}</div></div>`;
+  });
+}
+
+// ══════════════════════════════════════════════════
+// ALACENA
+// ══════════════════════════════════════════════════
+function nav_alacena() { renderPantry(); }
+async function savePantryItem() {
+  const nombre=document.getElementById('pa-nombre').value.trim();
+  if(!nombre){toast('Ingresa un nombre');return;}
+  S.pantry.push({id:Date.now(),ingrediente_id:'',nombre,cantidad_aprox:document.getElementById('pa-qty').value,unidad:'',ubicacion:document.getElementById('pa-loc').value,fecha_actualizacion:new Date().toISOString().slice(0,10)});
+  save();
+  if(APPS_SCRIPT_URL){ try{ await sheetPost('guardarAlacena',S.pantry); }catch(e){} }
+  closeModal('modal-pantry'); renderPantry(); toast('✓ Agregado a alacena y Sheets');
+}
+async function deletePantryItem(id) {
+  S.pantry=S.pantry.filter(p=>p.id!==id); save();
+  if(APPS_SCRIPT_URL){ try{ await sheetPost('guardarAlacena',S.pantry); }catch(e){} }
+  renderPantry(); toast('Ingrediente eliminado');
+}
+function filterPantry(f){S.pantryFilter=f;renderPantryList();}
+function renderPantry(){
+  document.getElementById('pc-todos').textContent=S.pantry.length;
+  document.getElementById('pc-ref').textContent=S.pantry.filter(p=>p.ubicacion==='refrigerador').length;
+  document.getElementById('pc-des').textContent=S.pantry.filter(p=>p.ubicacion==='despensa'||p.ubicacion==='congelador').length;
+  renderPantryList();
+}
+function renderPantryList(){
+  const el=document.getElementById('pantry-list'); el.innerHTML='';
+  const items=S.pantryFilter==='todos'?S.pantry:S.pantry.filter(p=>p.ubicacion===S.pantryFilter);
+  if(!items.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🧺</div><h3>Vacía</h3><p>Agrega lo que tienes en casa</p></div>`;return;}
+  const lc={refrigerador:'loc-ref',despensa:'loc-des',congelador:'loc-con'};
+  items.forEach(item=>{el.innerHTML+=`<div class="pantry-item"><span class="pantry-loc ${lc[item.ubicacion]||'loc-des'}">${item.ubicacion}</span><span class="pantry-name">${item.nombre}</span><span class="pantry-qty">${item.cantidad_aprox||''}</span><button class="pantry-del" onclick="deletePantryItem(${item.id})">✕</button></div>`;});
+}
+async function sugerirConAlacena() {
+  if(!S.pantry.length){toast('Agrega ingredientes primero');return;}
+  if(!GEMINI_KEY){toast('Configura tu API Key primero');return;}
+  const lista=S.pantry.map(p=>`${p.nombre}${p.cantidad_aprox?' ('+p.cantidad_aprox+')':''}`).join(', ');
+  showLoading('Buscando ideas con tu alacena...');
+  try {
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key
